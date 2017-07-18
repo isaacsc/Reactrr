@@ -1,9 +1,14 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import uuid from 'uuid'
 
 import InputText from '../InputText'
 import MessageList from '../MessageList'
 import ProfileBar from '../ProfileBar'
+
+const propTypes = {
+	user: PropTypes.object.isRequired,
+	onLogOut: PropTypes.func.isRequired
+}
 
 class Main extends Component {
 	constructor (props) {
@@ -138,6 +143,7 @@ class Main extends Component {
 					picture={this.props.user.photoURL}
 					userName={this.props.user.email.split('@')[0]}
 					onOpenText={this.handleOpenText}
+					onLogOut={this.props.onLogOut}
 				/>
 				{this.renderOpenText()}
 				<MessageList 

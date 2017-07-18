@@ -14,16 +14,24 @@ class App extends Component {
 	constructor () {
 		super()
 		this.state = {
-			user: {
-				photoURL: 'https://pbs.twimg.com/profile_images/549948122944659456/EwQFaYtv_bigger.jpeg',
-				email: 'isaacsan@gmail.com',
-				displayName: 'Isaac Sánchez',
-				location: 'Madrid, España'
-			}
+			user : null
 		}
-
+		
 		this.handleOnAuth = this.handleOnAuth.bind(this)
+		this.handleLogOut = this.handleLogOut.bind(this)
 	}
+
+	// Función del ciclo de  vida que se ejecuta justo después del renderizado cuando el DOM esta disponible
+	componentWillMount () {
+		firebase.auth().onAuthStateChanged(user => {
+			if (user) {
+				this.setState({ user })
+			} else {
+				this.setState({ user : null})
+			}
+		})
+	}
+
 
 	handleOnAuth () {
 		const provider = new firebase.auth.GithubAuthProvider()
@@ -33,6 +41,11 @@ class App extends Component {
 			.catch( error => console.log(`Error: ${error.code} ${error.message}`))	
 	}
 
+	handleLogOut () {
+		firebase.auth().signOut()
+			.then(() => console.log('Te has desconectado correctamente'))
+			.catch( error => console.log(`Error: ${error.code} ${error.message}`))	
+		}
 
 	render () {
 		return (
@@ -41,7 +54,10 @@ class App extends Component {
 					<Header />
 					<Match exactly pattern="/" render={ () => {
 						if (this.state.user) {
-							return (<Main user={this.state.user}/>)
+							return (<Main 
+								user={this.state.user}
+								onLogOut={this.handleLogOut}
+							/>)
 						} else {
 							return (<Login onAuth={this.handleOnAuth}/>)
 						}
