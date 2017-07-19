@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import uuid from 'uuid'
-
+import firebase from 'firebase'
 import InputText from '../InputText'
 import MessageList from '../MessageList'
 import ProfileBar from '../ProfileBar'
@@ -18,28 +18,7 @@ class Main extends Component {
 			user: Object.assign({}, this,props.user, {retweets: []}, {favorites: []}),
 			openText: false,
 			userNameToReply: '',
-			messages: [
-				{
-					id: uuid.v4(),
-					text: 'Mensaje del tweet',
-					picture: 'https://pbs.twimg.com/profile_images/549948122944659456/EwQFaYtv_bigger.jpeg',
-					displayName: 'Isaac Sanchez',
-					userName: 'isaacsc',
-					date: Date.now() - 180000,
-					retweets: 0,
-					favorites: 0
-				},
-				{ 
-					id: uuid.v4(),
-					text: 'Este es otro mensaje',
-					picture: 'https://pbs.twimg.com/profile_images/549948122944659456/EwQFaYtv_bigger.jpeg',
-					displayName: 'Pepe Perez',
-					userName: 'peperez',
-					date: Date.now() - 1800000,
-					retweets: 0,
-					favorites: 0
-				}
-			]
+			messages: []
 		}
 
 		this.handleCloseText = this.handleCloseText.bind(this)
@@ -48,6 +27,17 @@ class Main extends Component {
 		this.handleSendText = this.handleSendText.bind(this)
 		this.handleRetweet = this.handleRetweet.bind(this)
 		this.handleReplyTweet = this.handleReplyTweet.bind(this)
+	}
+
+	componentWillMount () {
+		const messageRef = firebase.database().ref().child('messages')
+
+		messageRef.on('child_added', snapshot => {
+			this.setState({ 
+				messages: this.state.messages.concat(snapshot.val()),
+				openText: false
+			})
+		})
 	}
 
 	handleCloseText (event) {
@@ -112,13 +102,14 @@ class Main extends Component {
 			displayName: this.props.user.displayName,
 			picture: this.props.user.photoURL,
 			date: Date.now(),
-			text: event.target.text.value
+			text: event.target.text.value,
+			favorites: 0,
+			retweets: 0
 		}
 
-		this.setState({
-			messages: this.state.messages.concat(newMessage),
-			openText: false
-		})
+		const messageRef = firebase.database().ref().child('messages')
+		const messageID = messageRef.push()
+		messageID.set(newMessage)
 	}
 
 	handleOpenText (event) {

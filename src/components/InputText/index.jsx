@@ -9,8 +9,8 @@ class InputText extends Component {
         <textarea 
           className={styles.text} 
           name="text"
-          value={this.props.userNameToReply ? `@${this.props.userNameToReply}` : ''}
         >
+          {this.props.userNameToReply ? `@${this.props.userNameToReply}` : ''}
         </textarea>
         <div className={styles.buttons}>
           <button className={styles.close} onClick={this.props.onCloseText}>Cerrar</button>
